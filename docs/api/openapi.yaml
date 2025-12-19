@@ -1,0 +1,258 @@
+openapi: 3.0.3
+info:
+  title: NOVAX Travel API
+  description: |
+    واجهة برمجة التطبيقات لمنصة NOVAX Travel لحجز الطيران.
+    
+    ## المصادقة
+    يستخدم النظام JWT للمصادقة. أرسل التوكن في header:
+    ```
+    Authorization: Bearer <token>
+    ```
+  version: 1.0.0
+  contact:
+    name: NOVAX Travel Support
+    url: https://novaxtravel.com
+
+servers:
+  - url: https://api.novaxtravel.com/api
+    description: Production
+  - url: http://localhost:8000/api
+    description: Development
+
+tags:
+  - name: Health
+    description: System health endpoints
+  - name: Auth
+    description: Authentication endpoints
+  - name: Flights
+    description: Flight search and booking
+  - name: Agencies
+    description: Agency management
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns OK if service is running
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /ready:
+    get:
+      tags: [Health]
+      summary: Readiness check
+      description: Checks database and critical dependencies
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ready
+                  database:
+                    type: string
+                    example: connected
+        '503':
+          description: Service not ready
+
+  /version:
+    get:
+      tags: [Health]
+      summary: Version info
+      description: Returns build version and git info
+      responses:
+        '200':
+          description: Version information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    example: 1.0.0
+                  git_sha:
+                    type: string
+                    example: abc123
+                  build_time:
+                    type: string
+                    example: "2025-12-20T00:00:00Z"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+        '401':
+          description: Invalid credentials
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: User registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, phone]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                phone:
+                  type: string
+      responses:
+        '201':
+          description: Registration successful
+        '422':
+          description: Validation error
+
+  /flights/search:
+    post:
+      tags: [Flights]
+      summary: Search flights
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [from, to, date]
+              properties:
+                from:
+                  type: string
+                  description: Origin airport code
+                to:
+                  type: string
+                  description: Destination airport code
+                date:
+                  type: string
+                  format: date
+                passengers:
+                  type: integer
+                  default: 1
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flights:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Flight'
+
+  /agencies:
+    get:
+      tags: [Agencies]
+      summary: List agencies
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of agencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agency'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Flight:
+      type: object
+      properties:
+        id:
+          type: integer
+        flight_number:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        departure_time:
+          type: string
+          format: date-time
+        arrival_time:
+          type: string
+          format: date-time
+        price:
+          type: number
+        available_seats:
+          type: integer
+
+    Agency:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
