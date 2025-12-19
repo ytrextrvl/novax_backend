@@ -9,8 +9,12 @@ use App\Http\Controllers\AgenciesController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\Admin\UsersController as AdminUsersController;
 use App\Http\Controllers\Admin\AuditController as AdminAuditController;
+use App\Http\Controllers\HealthController;
 
-Route::get('/health', fn() => response()->json(['ok' => true]));
+// Health & Readiness Endpoints
+Route::get('/health', [HealthController::class, 'health']);
+Route::get('/ready', [HealthController::class, 'ready']);
+Route::get('/version', [HealthController::class, 'version']);
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
