@@ -8,5 +8,18 @@
 /storage/logs/**
 !/storage/logs/.gitignore
 /.env
+/.env.local
+/.env.production
+/.env.staging
 /.phpunit.result.cache
+
+# Security - prevent secret leaks
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+credentials*.json
+.secrets
+.credentials
 /public/storage
