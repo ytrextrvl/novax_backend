@@ -1,0 +1,18 @@
+# NOVAX Backend - Code Owners
+# These owners will be requested for review on PRs affecting sensitive paths
+
+# CI/CD workflows - require review
+.github/workflows/ @ytrextrvl
+
+# Security configurations
+.github/dependabot.yml @ytrextrvl
+
+# Environment and secrets
+.env.example @ytrextrvl
+
+# Deployment configurations
+Dockerfile @ytrextrvl
+start.sh @ytrextrvl
+
+# Database migrations
+database/migrations/ @ytrextrvl
