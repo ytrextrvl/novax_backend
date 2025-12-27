@@ -62,3 +62,11 @@ Route::prefix('admin')->middleware(['jwt.auth','role:admin'])->group(function ()
     Route::post('/users', [AdminUsersController::class, 'create']);
     Route::get('/audit', [AdminAuditController::class, 'index']);
 });
+// NOVAX Health (Render/Cloudflare)
+Route::get("/healthz", function () {
+    return response()->json(["ok" => true, "service" => "novax-api", "ts" => date("c")], 200);
+});
+Route::get("/health", function () {
+    return response()->json(["ok" => true, "service" => "novax-api", "ts" => date("c")], 200);
+});
+
